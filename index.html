@@ -1,0 +1,123 @@
+<html>
+    <head>
+        <title>jquery.htmlUpdate test</title>
+        <script src="./js/jquery-3.3.1.js"></script>
+        <script src="./dist/jquery.widgetize.js"></script>
+    </head>
+    <body>
+
+    <div class="itemToBeWidgetized">processing</div>
+    <div class="itemToBeWidgetized2">processing</div>
+
+    <style>
+    .clicked {
+        color:red;
+    }
+    </style>
+    <script type="text/html" id="template2">
+        <div>{{ hello }} {{ name }}</div>
+    </script>
+    <script type="text/html" id="template">
+        <div>{{ hello }} {{ name }}</div>
+        <button class="clickable">Clicked {{ counter }} times!</button>
+        <input type="text" class="newHello" value="{{ hello }}" name="newHello">
+        <input type="text" class="newName" value="{{ name }}" name="newName">
+        <br>
+        {{#test}}
+            <a class="colorize {{ classes }}" id="id-{{ _id }}" href="#">Click Here: {{ test }}</a>
+            <br>
+        {{/test}}
+    </script>
+    <script>
+        $('.itemToBeWidgetized').widgetize(
+            $('#template').html(),
+            {
+                data: {
+                    name: 'world',
+                    hello: 'hello',
+                    counter: 0,
+                    test: [
+                        {
+                            test:'hi',
+                            classes: 'none',
+                        },
+                        {
+                            test:'hello',
+                            classes: '',
+                        },
+                    ]
+                },
+                events: {
+                    'keyup .newHello' : function(e){
+                        $(e.delegateTarget).widgetize('_updateData', 'hello', $(e.target).val());
+                        $(e.delegateTarget).widgetize();
+                    },
+                    'keyup .newName' : function(e){
+                        $(e.delegateTarget).widgetize('_updateData', 'name', $(e.target).val());
+                        $(e.delegateTarget).widgetize();
+                    },
+                    'click .clickable' : function(e) {
+                        $(e.delegateTarget).widgetize('_getSettings', 'data').counter += 1
+                        $(e.delegateTarget).widgetize();
+                    },
+                    'click .colorize' : function(e) {
+                        var $dt = $(e.delegateTarget);
+                        var $target = $(e.target);
+                        var _id = $target.attr('id').replace('id-', '');
+                        var str = 'test._id.classes'.replace('_id', _id);
+                        var response = $dt.widgetize('_updateData', str, 'clicked');
+                        $dt.widgetize();
+                    },
+                }
+            }
+        );
+    </script>
+    <script>
+        $('.itemToBeWidgetized2').widgetize(
+            $('#template2').html(),
+            {
+                data: {
+                    name: 'brady',
+                    hello: 'hi',
+                    counter: 0,
+                    test: [
+                        {
+                            test:'hi',
+                        },
+                        {
+                            test:'hello',
+                        },
+                    ]
+                },
+                events: {
+                    'keyup .newHello' : function(e){
+                        $(e.delegateTarget).widgetize('_getSettings', 'data').hello = $(e.target).val()
+                        $(e.delegateTarget).widgetize();
+                    },
+                    'keyup .newName' : function(e){
+                        $(e.delegateTarget).widgetize('_getSettings', 'data').name = $(e.target).val()
+                        $(e.delegateTarget).widgetize();
+                    },
+                    'click .clickable' : function(e) {
+                        $(e.delegateTarget).widgetize('_getSettings', 'data').counter += 1
+                        $(e.delegateTarget).widgetize();
+                    },
+                    'click .colorize' : function(e) {
+                        var $dt = $(e.delegateTarget);
+                        var data = $dt.widgetize('_getSettings', 'data');
+                        var $target = $(e.target);
+                        var index = $dt.widgetize( '_getIndexById', {
+                            _arr : $dt.widgetize('_getSettings', 'data').test, 
+                            _id : $target.attr('id').replace('id-', '')
+                        });
+                        data.test[index].classes = 'clicked';
+                        $dt.widgetize();
+                        console.log(data);
+                        console.log($dt.widgetize('_getSettings'));
+                    },
+                }
+            }
+        );
+    </script>
+</body>
+</html>
